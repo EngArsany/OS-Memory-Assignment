@@ -62,5 +62,5 @@ class Memory:
         pass # add code
 
     def print_memory(self):
-        for segment in self.memory_block:
+        for segment in self.memory_block.values():
             segment.print_info()
