@@ -1,1 +1,1 @@
-from src.Allocator import Allocator
+from Allocator import Allocator

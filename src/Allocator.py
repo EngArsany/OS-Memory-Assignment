@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.Process import Process
+from Process import Process
 
 class Allocator(ABC):
     def __init__(self, name):

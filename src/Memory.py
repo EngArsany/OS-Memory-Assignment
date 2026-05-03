@@ -1,7 +1,7 @@
-from src.Hole import Hole
-from src.Segment import Segment
-from src.InvalidBlock import InvalidBlock
-from src.Process import Process
+from Hole import Hole
+from Segment import Segment
+from InvalidBlock import InvalidBlock
+from Process import Process
 from typing import List
 from operator import attrgetter
 

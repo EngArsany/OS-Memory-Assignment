@@ -1,4 +1,4 @@
-from src.SegmentOfProcess import SegmentOfProcess
+from SegmentOfProcess import SegmentOfProcess
 
 class Process:
     def __init__(self, name, num_of_segments):

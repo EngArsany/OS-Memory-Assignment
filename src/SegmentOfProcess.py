@@ -1,8 +1,8 @@
-from src.Segment import Segment
-from src.Process import Process
+from Segment import Segment
+# import Process
 
 class SegmentOfProcess(Segment):
-    def __init__(self, type, starting_address, size, process : Process):
+    def __init__(self, type, starting_address, size, process):
         super().__init__(type, size, starting_address)
         self.process = process
     

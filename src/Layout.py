@@ -4,4 +4,4 @@ class Layout:
 
     @staticmethod
     def print_layout(self):
-        
+        pass

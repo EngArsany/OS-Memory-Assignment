@@ -1,4 +1,4 @@
-from src.Segment import Segment
+from Segment import Segment
 
 class InvalidBlock(Segment):
     def __init__(self, name, starting_address, size):

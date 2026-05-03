@@ -1,8 +1,7 @@
-from src.Hole import Hole
-from src.Layout import Layout
-from src.Allocator import Allocator
-from src.Process import Process
-from src.Segment import Segment
+from Hole import Hole
+from Layout import Layout
+from Process import Process
+from Segment import Segment
 
 
 def user_input():
@@ -37,8 +36,8 @@ def main():
     process_1.add_segment(Segment("Data", 120))
     process_1.add_segment(Segment("Stack", 90))
 
-    allocate(process_1)
-    Layout.print_layout()
+    # allocate(process_1)
+    # Layout.print_layout()
     
 
 
