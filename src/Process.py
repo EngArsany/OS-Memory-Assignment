@@ -5,7 +5,7 @@ class Process:
         self.name = name
         self.num_of_segments = num_of_segments
         self.start_address = None
-        self.total_size = None
+        self.total_size = 0
         self.segments = []
     
     def add_segment(self, segment : SegmentOfProcess):
