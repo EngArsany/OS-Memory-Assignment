@@ -4,10 +4,10 @@ class Segment(ABC):
     def __init__(self, name, size, starting_address = None):
         self.name = name
         self.size = size
-        self.starting_adress = starting_address
+        self.starting_address = starting_address
 
     def print_info(self):
-        print(self.name, ": ", self.size)
+        print(self.name, ": ", self.size, "\n")
 
     def get_starting_address(self):
         return self.starting_address
