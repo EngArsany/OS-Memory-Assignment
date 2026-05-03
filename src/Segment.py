@@ -1,4 +1,6 @@
-class Segment:
+from abc import ABC, abstractmethod
+
+class Segment(ABC):
     def __init__(self, name, size, starting_address = None):
         self.name = name
         self.size = size
