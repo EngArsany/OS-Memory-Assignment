@@ -1,70 +1,94 @@
+from typing import List
+from operator import attrgetter
 from Hole import Hole
 from Segment import Segment
 from InvalidBlock import InvalidBlock
 from Process import Process
-from typing import List
-from operator import attrgetter
 
-class Memory:    
-    def __init__(self, total_size, holes : List):
+
+class Memory:
+    """Manages memory allocation and tracks memory blocks (holes, segments, invalid blocks)."""
+    
+    def __init__(self, total_size: int, holes: List[Hole]):
         self.total_size = total_size
-        self.memory_block = {}
-        self.holes = holes
-        self.starting_addresses = []
-
-        for hole in holes:
-            self.add_hole(hole)
-            self.starting_addresses.append(hole.get_starting_address())
+        self._memory_block = {}
+        self._holes = []
+        self._starting_addresses = []
         
-        self.holes = sorted(holes, key=attrgetter('starting_address'))
-        self.starting_addresses = sorted(self.starting_addresses)
-
-        self.__initialize_invalid_blocks__()
-        self.memory_block = dict(sorted(self.memory_block.items()))
-
-
+        self._initialize_holes(holes)
+        self._initialize_invalid_blocks()
+        self._sort_segments_by_address()
     
-    def add_hole(self, hole : Hole):
-        self.memory_block[hole.get_starting_address()] = hole
+    def _initialize_holes(self, holes: List[Hole]) -> None:
+        """Initialize holes and their starting addresses."""
+        self._holes = sorted(holes, key=attrgetter('starting_address'))
+        
+        for hole in self._holes:
+            self._add_segment(hole)
+            self._starting_addresses.append(hole.starting_address)
+        
+        self._starting_addresses.sort()
     
-    def __add_segment__(self, segment : Segment):
-        pass # Add code
-
-    def __add_invalid_blocks__(self, block_list):
-        for block in block_list:
-            starting_address = block.get_starting_address()
-            self.memory_block[starting_address] = block
-            self.starting_addresses.append(starting_address)
-
-        self.starting_addresses = sorted(self.starting_addresses)
-
-
-    def __initialize_invalid_blocks__(self):
-        invalid_block_list = []
-        for index, (start_address, hole) in enumerate(self.memory_block.items()):
-            new_address = hole.get_size() + start_address
-            
-            # Skip if this is the last block
-            if index + 1 >= len(self.starting_addresses):
+    def _add_segment(self, segment: Segment) -> None:
+        """Add any segment (Hole, InvalidBlock, or regular Segment) to memory."""
+        self._memory_block[segment.starting_address] = segment
+    
+    def _add_segments(self, segments: List[Segment]) -> None:
+        """Add multiple segments to memory."""
+        for segment in segments:
+            self._memory_block[segment.starting_address] = segment
+            self._starting_addresses.append(segment.starting_address)
+        
+        self._starting_addresses.sort()
+    
+    def _initialize_invalid_blocks(self) -> None:
+        """Create invalid blocks for gaps between valid memory segments."""
+        invalid_blocks = []
+        
+        for index, (start_address, segment) in enumerate(self._memory_block.items()):
+            if self._is_last_segment(index):
                 continue
                 
-            next_address = self.starting_addresses[index + 1]
-            block_size = next_address - new_address
+            next_address = self._starting_addresses[index + 1]
+            gap = self._calculate_gap_between_segments(segment, next_address)
             
-            # Only create invalid block if size is positive
-            if block_size > 0:
-                invalid_block = InvalidBlock(f"B{index}", new_address, block_size)
-                invalid_block_list.append(invalid_block)
-
-        self.__add_invalid_blocks__(invalid_block_list)
-
-    def add_process(self, process : Process):
-        pass # add code
-
-    def draw_memory(self):
-        pass # add code
-
-    def print_memory(self):
-        for segment in self.memory_block.values():
+            if gap.size > 0:
+                invalid_blocks.append(gap)
+        
+        self._add_segments(invalid_blocks)
+    
+    def _is_last_segment(self, index: int) -> bool:
+        """Check if the given index refers to the last memory segment."""
+        return index + 1 >= len(self._starting_addresses)
+    
+    def _calculate_gap_between_segments(self, current_segment: Segment, next_address: int) -> InvalidBlock:
+        """Calculate the InvalidBlock between current segment and the next one."""
+        end_of_current = current_segment.starting_address + current_segment.size
+        gap_size = next_address - end_of_current
+        
+        if gap_size <= 0:
+            return InvalidBlock("empty", 0, 0)
+            
+        return InvalidBlock(
+            name=f"I_{current_segment.starting_address}",
+            starting_address=end_of_current,
+            size=gap_size
+        )
+    
+    def _sort_segments_by_address(self) -> None:
+        """Sort memory segments by their starting addresses."""
+        self._memory_block = dict(sorted(self._memory_block.items()))
+    
+    def add_process(self, process: Process) -> None:
+        """Add a process to memory (implementation pending)."""
+        pass
+    
+    def draw_memory(self) -> None:
+        """Draw memory visualization (implementation pending)."""
+        pass
+    
+    def print_memory(self) -> None:
+        """Print all memory segments information."""
+        for segment in self._memory_block.values():
             segment.print_info()
-            print(" ")
+            print()
