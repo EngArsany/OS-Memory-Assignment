@@ -2,6 +2,7 @@ from Hole import Hole
 from Layout import Layout
 from Process import Process
 from Segment import Segment
+from Memory import Memory
 
 
 def user_input():
@@ -15,17 +16,14 @@ def user_input():
 
     # Process
 
-
-
-
-
-
 def main():
     # Given Test case
     total_memory = 1000
-    hole_1 = Hole("H1", 0, 300)
-    hole_2 = Hole("H2", 400, 250)
-    hole_3 = Hole("H3", 700, 200)
+    holes = [Hole("H1", 0, 300), Hole("H2", 400, 250), Hole("H3", 700, 200)]
+    memory = Memory(total_memory, holes)
+    print("Hello world")
+    memory.print_memory()
+
 
     algorithm = "first-fit"
 
@@ -67,3 +65,4 @@ def main():
 
 
 
+main()

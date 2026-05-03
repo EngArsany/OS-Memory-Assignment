@@ -45,3 +45,7 @@ class Memory:
 
     def draw_memory(self):
         pass # add code
+
+    def print_memory(self):
+        for segment in self.memory_block:
+            segment.print_info()
