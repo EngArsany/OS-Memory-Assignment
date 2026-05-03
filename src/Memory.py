@@ -67,3 +67,4 @@ class Memory:
     def print_memory(self):
         for segment in self.memory_block.values():
             segment.print_info()
+            print(" ")

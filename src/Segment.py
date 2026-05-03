@@ -7,7 +7,10 @@ class Segment(ABC):
         self.starting_address = starting_address
 
     def print_info(self):
-        print(self.name, ": ", self.size, "\n")
+        print(self.name, ": ")
+        print(" Starting Address: ", self.starting_address)
+        print(" Size: ", self.size)
+
 
     def get_starting_address(self):
         return self.starting_address
