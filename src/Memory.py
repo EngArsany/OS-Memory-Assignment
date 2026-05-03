@@ -32,7 +32,7 @@ class Memory:
         self.memory_block[block.get_starting_address] = block
 
     def __initialize_invalid_blocks__(self):
-        for index, (start_address, hole) in self.memory_block:
+        for index, (start_address, hole) in enumerate(self.memory_block.items()):
             new_address = hole.get_size() + start_address
             next_address = self.starting_addresses[index+1] if self.starting_addresses[index+1] else 0
 
