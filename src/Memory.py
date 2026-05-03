@@ -20,6 +20,8 @@ class Memory:
         self.starting_addresses = sorted(self.starting_addresses)
 
         self.__initialize_invalid_blocks__()
+        self.memory_block = dict(sorted(self.memory_block.items()))
+
 
     
     def add_hole(self, hole : Hole):
@@ -30,8 +32,9 @@ class Memory:
 
     def __add_invalid_blocks__(self, block_list):
         for block in block_list:
-            self.memory_block[block.get_starting_address] = block
-            self.starting_addresses.append(block.get_starting_address())
+            starting_address = block.get_starting_address()
+            self.memory_block[starting_address] = block
+            self.starting_addresses.append(starting_address)
 
         self.starting_addresses = sorted(self.starting_addresses)
 
