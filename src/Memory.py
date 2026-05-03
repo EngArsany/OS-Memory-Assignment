@@ -28,17 +28,32 @@ class Memory:
     def __add_segment__(self, segment : Segment):
         pass # Add code
 
-    def __add_invalid_block__(self, block):
-        self.memory_block[block.get_starting_address] = block
+    def __add_invalid_blocks__(self, block_list):
+        for block in block_list:
+            self.memory_block[block.get_starting_address] = block
+            self.starting_addresses.append(block.get_starting_address())
+
+        self.starting_addresses = sorted(self.starting_addresses)
+
 
     def __initialize_invalid_blocks__(self):
+        invalid_block_list = []
         for index, (start_address, hole) in enumerate(self.memory_block.items()):
             new_address = hole.get_size() + start_address
-            next_address = self.starting_addresses[index+1] if self.starting_addresses[index+1] else 0
-
+            
+            # Skip if this is the last block
+            if index + 1 >= len(self.starting_addresses):
+                continue
+                
+            next_address = self.starting_addresses[index + 1]
             block_size = next_address - new_address
-            invalid_block = InvalidBlock("B{index}", new_address, block_size)
-            self.__add_invalid_block__(invalid_block)
+            
+            # Only create invalid block if size is positive
+            if block_size > 0:
+                invalid_block = InvalidBlock(f"B{index}", new_address, block_size)
+                invalid_block_list.append(invalid_block)
+
+        self.__add_invalid_blocks__(invalid_block_list)
 
     def add_process(self, process : Process):
         pass # add code
