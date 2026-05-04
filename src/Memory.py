@@ -41,7 +41,7 @@ class Memory:
             self._starting_addresses.append(segment.starting_address)
         
         self._starting_addresses.sort()
-    
+
     def _initialize_invalid_blocks(self) -> None:
         """Create invalid blocks for gaps between valid memory segments."""
         invalid_blocks = []
@@ -99,3 +99,6 @@ class Memory:
     
     def get_holes(self):
         return self._holes
+    
+    def get_process_list(self):
+        return self.processes
