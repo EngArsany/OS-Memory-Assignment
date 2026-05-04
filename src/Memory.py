@@ -92,3 +92,6 @@ class Memory:
         for segment in self._memory_block.values():
             segment.print_info()
             print()
+    
+    def get_memory_block(self):
+        return self._memory_block
