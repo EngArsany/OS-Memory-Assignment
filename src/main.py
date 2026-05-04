@@ -3,7 +3,8 @@ from Layout import Layout
 from Process import Process
 from Segment import Segment
 from Memory import Memory
-
+from FirstFitAllocator import FirstFitAllocator
+from BestFitAllocator import BestFitAllocator
 
 def user_input():
     print("User Input")
@@ -24,8 +25,8 @@ def main():
     print("Hello world")
     memory.print_memory()
 
-
     algorithm = "first-fit"
+    allocator = FirstFitAllocator("First-Fit Allocator") if algorithm == "first-fit" else BestFitAllocator("Best-Fit Allocator")
 
     # Input 1
     operation = "allocation"
