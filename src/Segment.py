@@ -1,11 +1,18 @@
 from abc import ABC, abstractmethod
 
 class Segment(ABC):
-    def __init__(self, name, size, starting_address = None):
-        self.name = name
+    def __init__(self, size, name = None, starting_address = None):
         self.size = size
         self.starting_address = starting_address
-        self.ending_address = self.starting_address + self.size
+        self.ending_address = self.starting_address + self.size if self.starting_address else None
+
+        if name is None:
+            self.__class__._counter += 1
+            self.name = f"{self.get_prefix()}{self.__class__._counter}"
+
+    @abstractmethod
+    def get_prefix(self):
+        pass
 
     def print_info(self):
         print(self.name, ": ")

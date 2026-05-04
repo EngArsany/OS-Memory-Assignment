@@ -1,15 +1,23 @@
 from Segment import Segment
-# import Process
 
 class SegmentOfProcess(Segment):
-    def __init__(self, data_type, starting_address, size, process):
-        super().__init__(data_type, size, starting_address)
+    _counter = 0
+
+    def __init__(self, name, starting_address, size, process, data_type):
+        super().__init__(name, size, starting_address)
         self.process = process
+        self.data_type = data_type
     
     # Override
     def print_info(self):
         print(self.process.get_name())
         print(self.name, ": ", self.size)
 
+    def get_prefix(self):
+        return "S"
+    
     def get_process(self):
         return self.process
+
+    def get_data_type(self):
+        return self.data_type

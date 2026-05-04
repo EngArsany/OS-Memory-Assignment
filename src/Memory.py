@@ -8,8 +8,6 @@ from Process import Process
 
 class Memory:
     """Manages memory allocation and tracks memory blocks (holes, segments, invalid blocks)."""
-    hole_counter = 0
-    
     def __init__(self, total_size: int, holes: List[Hole]):
         self.total_size = total_size
         self._memory_block = {}
@@ -78,7 +76,7 @@ class Memory:
     def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = hole_1.get_starting_address()
         new_size = hole_1.get_size() + hole_2.get_size()
-        new_hole = Hole(f"H{++self.hole_counter}", new_starting_address, new_size)
+        new_hole = Hole(None, new_starting_address, new_size)
 
         self.add_segment(new_hole)
         del self._memory_block[hole_2.get_starting_address()]
