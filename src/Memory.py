@@ -8,6 +8,7 @@ from Process import Process
 
 class Memory:
     """Manages memory allocation and tracks memory blocks (holes, segments, invalid blocks)."""
+    hole_counter = 0
     
     def __init__(self, total_size: int, holes: List[Hole]):
         self.total_size = total_size
@@ -29,10 +30,13 @@ class Memory:
             self._starting_addresses.append(hole.starting_address)
         
         self._starting_addresses.sort()
+        self._merge_contiguous_holes()
     
     def add_segment(self, segment: Segment) -> None:
         """Add any segment (Hole, InvalidBlock, or regular Segment) to memory."""
         self._memory_block[segment.starting_address] = segment
+        self._sort_segments_by_address()
+        self._merge_contiguous_holes()
     
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
@@ -41,6 +45,7 @@ class Memory:
             self._starting_addresses.append(segment.starting_address)
         
         self._starting_addresses.sort()
+        self._merge_contiguous_holes()
 
     def _initialize_invalid_blocks(self) -> None:
         """Create invalid blocks for gaps between valid memory segments."""
@@ -57,7 +62,28 @@ class Memory:
                 invalid_blocks.append(gap)
         
         self._add_segments(invalid_blocks)
+        self._merge_contiguous_holes()
+
+    def _merge_contiguous_holes(self):
+        pointer_1 = 0
+        for pointer_2 in range(1, len(self._holes)):
+            hole_1 = self._holes[pointer_1]
+            hole_2 = self._holes[pointer_2]
+
+            is_contiguous = hole_1.get_ending_address() >= hole_2.get_starting_address()
+            if is_contiguous:
+                self._merge_holes(hole_1, hole_2)
     
+
+    def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
+        new_starting_address = hole_1.get_starting_address()
+        new_size = hole_1.get_size() + hole_2.get_size()
+        new_hole = Hole(f"H{++self.hole_counter}", new_starting_address, new_size)
+
+        self.add_segment(new_hole)
+        del self._memory_block[hole_2.get_starting_address()]
+        del self._holes[hole_2]
+
     def _is_last_segment(self, index: int) -> bool:
         """Check if the given index refers to the last memory segment."""
         return index + 1 >= len(self._starting_addresses)
