@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from Process import Process
 from Memory import Memory
@@ -8,11 +9,26 @@ class Allocator(ABC):
     def __init__(self, name):
         self.name = name
     
+    def allocate(self, process : Process, memory : Memory):
+        memory_block = memory.get_memory_block()
+        spare_memory_block = copy.deepcopy(memory_block)
+        
+        segments = process.get_segments()
+        for segment in segments:
+            chosen_hole = self.choose_hole(segment, memory_block)
+            if chosen_hole is None:
+                memory_block = spare_memory_block
+                print(f"== Process {process.get_name()} does not fit! ==")
+                return
+                
+            self.allocate_segment_to_hole(segment, chosen_hole)
+            memory.add_segment(segment)
+
     @abstractmethod
-    def choose_hole(self, process : Process, memory : Memory) -> Hole:
+    def choose_hole(self, segment : Segment, memory : dict) -> Hole:
         pass
 
-    def allocate_segment_to_hole(self, segment : Segment, hole : Hole, memory_block : dict):
+    def allocate_segment_to_hole(self, segment : Segment, hole : Hole):
         hole_starting_address = hole.get_starting_address()
         segment_size = segment.get_size()
 
