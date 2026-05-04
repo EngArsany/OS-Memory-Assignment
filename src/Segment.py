@@ -5,6 +5,7 @@ class Segment(ABC):
         self.name = name
         self.size = size
         self.starting_address = starting_address
+        self.ending_address = self.starting_address + self.size
 
     def print_info(self):
         print(self.name, ": ")
