@@ -24,12 +24,12 @@ class Memory:
         self._holes = sorted(holes, key=attrgetter('starting_address'))
         
         for hole in self._holes:
-            self._add_segment(hole)
+            self.add_segment(hole)
             self._starting_addresses.append(hole.starting_address)
         
         self._starting_addresses.sort()
     
-    def _add_segment(self, segment: Segment) -> None:
+    def add_segment(self, segment: Segment) -> None:
         """Add any segment (Hole, InvalidBlock, or regular Segment) to memory."""
         self._memory_block[segment.starting_address] = segment
     
