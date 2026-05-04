@@ -7,6 +7,7 @@ from Segment import Segment
 from Hole import Hole
 
 class Allocator(ABC):
+    hole_counter = 0
     def __init__(self, name, memory : Memory):
         self.name = name
         self.memory = memory
@@ -44,6 +45,15 @@ class Allocator(ABC):
 
     def _is_hole(self, segment : Segment) -> bool:
         return isinstance(segment, Hole)
-    
+
     def deallocate(self, process : Process):
-        pass
+        if process not in self.memory.get_process_list():
+            print(f"Process {process.get_name()} is not in memory")
+        
+        segments = process.get_segments()
+        for segment in segments:
+            substituting_hole = Hole(f"H{++self.hole_counter}", segment.get_starting_address(), segment.get_size())
+            self.memory.add_segment(substituting_hole) # Overwrites the SegmentOfProcess in the address
+
+        print("== De-Allocation Successful ==")
+
