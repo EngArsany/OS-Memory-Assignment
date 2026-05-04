@@ -11,10 +11,12 @@ class Segment(ABC):
         print(" Starting Address: ", self.starting_address)
         print(" Size: ", self.size)
 
-
     def get_starting_address(self):
         return self.starting_address
-    
+
+    def set_starting_address(self, address):
+        self.starting_address = address
+
     def get_name(self):
         return self.name
 
