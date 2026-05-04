@@ -95,3 +95,6 @@ class Memory:
     
     def get_memory_block(self):
         return self._memory_block
+    
+    def get_holes(self):
+        return self._holes
