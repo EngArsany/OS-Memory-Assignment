@@ -6,10 +6,9 @@ from Hole import Hole
 class BestFitAllocator(Allocator):
     max_num = 50000
 
-    def choose_hole(self, segment : Segment, memory_block : dict) -> Hole:
+    def choose_hole(self, segment : Segment, hole_list : List) -> Hole:
         """Allocate the smallest hole that is big enough"""
         segment_size = segment.get_size()
-        hole_list = self._find_all_holes()
         
         blank_hole = Hole("Blank Hole", -1, self.max_num)
         min_hole = blank_hole
