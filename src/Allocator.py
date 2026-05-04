@@ -25,6 +25,8 @@ class Allocator(ABC):
                 
             self.allocate_segment_to_hole(segment, chosen_hole)
             self.memory.add_segment(segment)
+        
+        self.memory.add_process_to_list[process]
 
     @abstractmethod
     def choose_hole(self, segment : Segment, hole_list : List) -> Hole:
