@@ -25,7 +25,7 @@ class Allocator(ABC):
             memory.add_segment(segment)
 
     @abstractmethod
-    def choose_hole(self, segment : Segment, memory : dict) -> Hole:
+    def choose_hole(self, segment : Segment, memory_block : dict) -> Hole:
         pass
 
     def allocate_segment_to_hole(self, segment : Segment, hole : Hole):
@@ -37,3 +37,6 @@ class Allocator(ABC):
 
         hole.set_starting_address(hole_starting_address + segment_size)
         hole.shrink_by(segment_size)
+
+    def _is_hole(self, segment : Segment) -> bool:
+        return isinstance(segment, Hole)
