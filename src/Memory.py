@@ -13,6 +13,7 @@ class Memory:
         self.total_size = total_size
         self._memory_block = {}
         self._holes = []
+        self.processes = []
         self._starting_addresses = []
         
         self._initialize_holes(holes)
@@ -79,10 +80,10 @@ class Memory:
         """Sort memory segments by their starting addresses."""
         self._memory_block = dict(sorted(self._memory_block.items()))
     
-    def add_process(self, process: Process) -> None:
-        """Add a process to memory (implementation pending)."""
-        pass
-    
+    def add_process_to_list(self, process: Process) -> None:
+        """Add a process to memory processes list."""
+        self.processes.append(process)
+        
     def draw_memory(self) -> None:
         """Draw memory visualization (implementation pending)."""
         pass
