@@ -7,11 +7,12 @@ from Segment import Segment
 from Hole import Hole
 
 class Allocator(ABC):
-    def __init__(self, name):
+    def __init__(self, name, memory : Memory):
         self.name = name
+        self.memory = memory
     
-    def allocate(self, process : Process, memory : Memory):
-        hole_list = memory.get_holes()
+    def allocate(self, process : Process):
+        hole_list = self.memory.get_holes()
         spare_memory_block = copy.deepcopy(memory_block)
         
         segments = process.get_segments()
@@ -23,7 +24,7 @@ class Allocator(ABC):
                 return
                 
             self.allocate_segment_to_hole(segment, chosen_hole)
-            memory.add_segment(segment)
+            self.memory.add_segment(segment)
 
     @abstractmethod
     def choose_hole(self, segment : Segment, hole_list : List) -> Hole:
@@ -41,3 +42,6 @@ class Allocator(ABC):
 
     def _is_hole(self, segment : Segment) -> bool:
         return isinstance(segment, Hole)
+    
+    def deallocate(self, process : Process):
+        pass
