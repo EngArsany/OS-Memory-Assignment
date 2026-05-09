@@ -64,13 +64,16 @@ class Memory:
 
     def _merge_contiguous_holes(self):
         pointer_1 = 0
-        for pointer_2 in range(1, len(self._holes)):
+        for pointer_2 in range(1, len(self._holes)-1):
             hole_1 = self._holes[pointer_1]
             hole_2 = self._holes[pointer_2]
 
             is_contiguous = hole_1.get_ending_address() >= hole_2.get_starting_address()
             if is_contiguous:
                 self._merge_holes(hole_1, hole_2)
+            
+            pointer_1 += 1
+            
     
     def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = hole_1.get_starting_address()
