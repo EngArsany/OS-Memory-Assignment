@@ -3,7 +3,7 @@ from Segment import Segment
 class Hole(Segment):
     _counter = 0
 
-    def __init__(self, name, starting_address, size):
+    def __init__(self, size = 0, name = None, starting_address = 0):
         super().__init__(name, size, starting_address)
     
     def get_prefix(self):

@@ -34,6 +34,7 @@ def main():
     process_1.add_segment(Segment("Code", 100))
     process_1.add_segment(Segment("Data", 120))
     process_1.add_segment(Segment("Stack", 90))
+    memory.print_memory()
 
     # allocate(process_1)
     # Layout.print_layout()
