@@ -26,7 +26,7 @@ def main():
     memory.print_memory()
 
     algorithm = "first-fit"
-    allocator = FirstFitAllocator("First-Fit Allocator") if algorithm == "first-fit" else BestFitAllocator("Best-Fit Allocator")
+    allocator = FirstFitAllocator("First-Fit Allocator", memory) if algorithm == "first-fit" else BestFitAllocator("Best-Fit Allocator")
 
     # Input 1
     operation = "allocation"

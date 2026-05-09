@@ -2,9 +2,13 @@ from Allocator import Allocator
 from typing import List
 from Segment import Segment
 from Hole import Hole
+from Memory import Memory
 
 class BestFitAllocator(Allocator):
     max_num = 50000
+
+    def __init__(self, name, memory : Memory):
+        super().__init__(name, memory)
 
     def choose_hole(self, segment : Segment, hole_list : List) -> Hole:
         """Allocate the smallest hole that is big enough"""
