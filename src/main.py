@@ -35,6 +35,7 @@ def main():
     process_1.add_segment("Code", 100)
     process_1.add_segment("Data", 120)
     process_1.add_segment("Stack", 90)
+    allocator.allocate(process_1)
     memory.print_memory()
 
     # allocate(process_1)

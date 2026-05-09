@@ -29,12 +29,11 @@ class Memory:
         
         self._starting_addresses.sort()
         self._merge_contiguous_holes()
-    
+
     def add_segment(self, segment: Segment) -> None:
         """Add any segment (Hole, InvalidBlock, or regular Segment) to memory."""
         self._memory_block[segment.starting_address] = segment
         self._sort_segments_by_address()
-        # self._merge_contiguous_holes()
     
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
@@ -74,7 +73,6 @@ class Memory:
             
             pointer_1 += 1
             
-    
     def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = min(hole_1.get_starting_address(), hole_2.get_starting_address())
         hole_1.set_starting_address(new_starting_address)
@@ -134,3 +132,6 @@ class Memory:
     
     def get_process_list(self):
         return self.processes
+    
+    def set_memory_block(self, memory_block : dict):
+        self.memory_block = memory_block

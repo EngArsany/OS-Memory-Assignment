@@ -13,13 +13,13 @@ class Allocator(ABC):
     
     def allocate(self, process : Process):
         hole_list = self.memory.get_holes()
-        spare_memory_block = copy.deepcopy(memory_block)
+        spare_memory_block = copy.deepcopy(self.memory.get_memory_block())
         
         segments = process.get_segments()
         for segment in segments:
             chosen_hole = self.choose_hole(segment, hole_list)
             if chosen_hole is None:
-                memory_block = spare_memory_block
+                self.memory.set_memory_block(spare_memory_block)
                 print(f"== Process {process.get_name()} does not fit! ==")
                 return
                 
