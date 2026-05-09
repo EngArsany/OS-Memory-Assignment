@@ -5,6 +5,7 @@ from Segment import Segment
 from Memory import Memory
 from FirstFitAllocator import FirstFitAllocator
 from BestFitAllocator import BestFitAllocator
+from SegmentOfProcess import SegmentOfProcess
 
 def user_input():
     print("User Input")
@@ -31,9 +32,9 @@ def main():
     # Input 1
     operation = "allocation"
     process_1 = Process("P1", 3)
-    process_1.add_segment(Segment("Code", 100))
-    process_1.add_segment(Segment("Data", 120))
-    process_1.add_segment(Segment("Stack", 90))
+    process_1.add_segment("Code", 100)
+    process_1.add_segment("Data", 120)
+    process_1.add_segment("Stack", 90)
     memory.print_memory()
 
     # allocate(process_1)

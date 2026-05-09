@@ -3,7 +3,7 @@ from Segment import Segment
 class SegmentOfProcess(Segment):
     _counter = 0
 
-    def __init__(self, size, name, starting_address, process, data_type):
+    def __init__(self, size, process, data_type, name= None, starting_address = 0):
         super().__init__(size, name, starting_address)
         self.process = process
         self.data_type = data_type

@@ -8,7 +8,8 @@ class Process:
         self.total_size = 0
         self.segments = []
     
-    def add_segment(self, segment : SegmentOfProcess):
+    def add_segment(self, data_type : str, size : int):
+        segment = SegmentOfProcess(size, self, data_type)
         self.segments.append(segment)
         self.total_size += segment.get_size()
     
