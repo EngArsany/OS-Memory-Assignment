@@ -34,7 +34,7 @@ class Memory:
         """Add any segment (Hole, InvalidBlock, or regular Segment) to memory."""
         self._memory_block[segment.starting_address] = segment
         self._sort_segments_by_address()
-        self._merge_contiguous_holes()
+        # self._merge_contiguous_holes()
     
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
@@ -79,8 +79,13 @@ class Memory:
         hole_1.set_starting_address(new_starting_address)
         hole_1.set_size(new_size)
 
-        del self._memory_block[hole_2.get_starting_address()]
-        del self._holes[hole_2]
+        for key, value in (self._memory_block.items()):
+            if value == hole_2:
+                del self._memory_block[key]
+                break        
+
+        if hole_2 in self._holes:
+            self._holes.remove(hole_2)
 
     def _is_last_segment(self, index: int) -> bool:
         """Check if the given index refers to the last memory segment."""
