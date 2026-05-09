@@ -72,13 +72,13 @@ class Memory:
             if is_contiguous:
                 self._merge_holes(hole_1, hole_2)
     
-
     def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = hole_1.get_starting_address()
         new_size = hole_1.get_size() + hole_2.get_size()
-        new_hole = Hole(None, new_starting_address, new_size)
+    
+        hole_1.set_starting_address(new_starting_address)
+        hole_1.set_size(new_size)
 
-        self.add_segment(new_hole)
         del self._memory_block[hole_2.get_starting_address()]
         del self._holes[hole_2]
 

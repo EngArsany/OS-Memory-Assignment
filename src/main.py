@@ -42,27 +42,27 @@ def main():
 
 
     # Input 2
-    operation = "allocation"
-    process_2 = Process("P2", 2)
-    process_2.add_segment(Segment("Code", 200))
-    process_2.add_segment(Segment("Data", 40))
+    # operation = "allocation"
+    # process_2 = Process("P2", 2)
+    # process_2.add_segment(Segment("Code", 200))
+    # process_2.add_segment(Segment("Data", 40))
 
 
-    # Input 3
-    operation = "allocation"
-    process_3 = Process("P3", 3)
-    process_3.add_segment(Segment("Code", 120))
-    process_3.add_segment(Segment("Data", 50))
+    # # Input 3
+    # operation = "allocation"
+    # process_3 = Process("P3", 3)
+    # process_3.add_segment(Segment("Code", 120))
+    # process_3.add_segment(Segment("Data", 50))
 
-    # Input 4
-    operation = "de-allocation" # Process 1
+    # # Input 4
+    # operation = "de-allocation" # Process 1
     
 
-    # Input 5
-    operation = "allocation"
-    process_4 = Process("P4", 3)
-    process_4.add_segment(Segment("Code", 230))
-    process_4.add_segment(Segment("Data", 40))
+    # # Input 5
+    # operation = "allocation"
+    # process_4 = Process("P4", 3)
+    # process_4.add_segment(Segment("Code", 230))
+    # process_4.add_segment(Segment("Data", 40))
 
 
 

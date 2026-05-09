@@ -9,8 +9,8 @@ class Hole(Segment):
     def get_prefix(self):
         return "H"
 
-    def set_size(self, newSize):
-        self.size = newSize
+    def set_size(self, new_size):
+        self.size = new_size
     
     def shrink_by(self, size):
         self.size -= size
