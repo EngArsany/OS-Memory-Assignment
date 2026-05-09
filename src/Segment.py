@@ -5,8 +5,9 @@ class Segment(ABC):
         self.size = size
         self.starting_address = starting_address
         self.ending_address = self.starting_address + self.size
+        self.name = name
 
-        if name is None:
+        if self.name is None:
             self.__class__._counter += 1
             self.name = f"{self.get_prefix()}{self.__class__._counter}"
 
@@ -15,7 +16,10 @@ class Segment(ABC):
         pass
 
     def print_info(self):
-        print(self.name, ": ")
+        if self.name == None:
+            self.name = "hole naming error"
+        else:
+            print(self.name, ": ")
         print(" Starting Address: ", self.starting_address)
         print(" Size: ", self.size)
 

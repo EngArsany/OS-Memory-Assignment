@@ -4,7 +4,7 @@ class Hole(Segment):
     _counter = 0
 
     def __init__(self, size = 0, name = None, starting_address = 0):
-        super().__init__(name, size, starting_address)
+        super().__init__(size, name, starting_address)
     
     def get_prefix(self):
         return "H"

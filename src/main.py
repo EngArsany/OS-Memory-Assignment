@@ -20,7 +20,7 @@ def user_input():
 def main():
     # Given Test case
     total_memory = 1000
-    holes = [Hole("H1", 0, 300), Hole("H2", 400, 250), Hole("H3", 700, 200)]
+    holes = [Hole(300, "H1", 0), Hole(250, "H2", 400), Hole(200, "H3", 700)]
     memory = Memory(total_memory, holes)
     print("Hello world")
     memory.print_memory()

@@ -4,7 +4,7 @@ class SegmentOfProcess(Segment):
     _counter = 0
 
     def __init__(self, size, name, starting_address, process, data_type):
-        super().__init__(name, size, starting_address)
+        super().__init__(size, name, starting_address)
         self.process = process
         self.data_type = data_type
     

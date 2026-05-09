@@ -76,16 +76,16 @@ class Memory:
             
     
     def _merge_holes(self, hole_1 : Hole, hole_2 : Hole):
-        new_starting_address = hole_1.get_starting_address()
-        new_size = hole_1.get_size() + hole_2.get_size()
-    
+        new_starting_address = min(hole_1.get_starting_address(), hole_2.get_starting_address())
         hole_1.set_starting_address(new_starting_address)
+
+        new_size = hole_1.get_size() + hole_2.get_size()    
         hole_1.set_size(new_size)
 
         for key, value in (self._memory_block.items()):
             if value == hole_2:
                 del self._memory_block[key]
-                break        
+                break
 
         if hole_2 in self._holes:
             self._holes.remove(hole_2)
