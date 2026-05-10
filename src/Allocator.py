@@ -10,25 +10,8 @@ class Allocator(ABC):
     def __init__(self, name, memory : Memory):
         self.name = name
         self.memory = memory
-    
-    def allocate(self, process : Process):
-        hole_list = self.memory.get_holes()
-        spare_memory_block = copy.deepcopy(self.memory.get_memory_block())
 
-        segments = process.get_segments()
-        for segment in segments:
-            chosen_hole = self.choose_hole(segment, hole_list)
-            # print(segment.print_info())
-            if chosen_hole is None:
-                self.memory.set_memory_block(spare_memory_block)
-                print(f"== Process {process.get_name()} does not fit! ==")
-                return
-                
-            self.allocate_segment_to_hole(segment, chosen_hole)
-            self.memory.add_segment(segment)
-        
-        self.memory.add_process_to_list(process)
-
+    # Helper Methods
     @abstractmethod
     def choose_hole(self, segment : Segment, hole_list : List) -> Hole:
         pass
@@ -45,6 +28,24 @@ class Allocator(ABC):
 
     def _is_hole(self, segment : Segment) -> bool:
         return isinstance(segment, Hole)
+
+    # Core Logic
+    def allocate(self, process : Process):
+        hole_list = self.memory.get_holes()
+        spare_memory_block = copy.deepcopy(self.memory.get_memory_block())
+
+        segments = process.get_segments()
+        for segment in segments:
+            chosen_hole = self.choose_hole(segment, hole_list)
+            if chosen_hole is None:
+                self.memory.set_memory_block(spare_memory_block)
+                print(f"== Process {process.get_name()} does not fit! ==")
+                return
+                
+            self.allocate_segment_to_hole(segment, chosen_hole)
+            self.memory.add_segment(segment)
+        
+        self.memory.add_process_to_list(process)
 
     def deallocate(self, process : Process):
         if process not in self.memory.get_process_list():
