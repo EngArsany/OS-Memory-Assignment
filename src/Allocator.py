@@ -53,7 +53,9 @@ class Allocator(ABC):
         
         segments = process.get_segments()
         for segment in segments:
-            substituting_hole = Hole(None, segment.get_starting_address(), segment.get_size())
+            substituting_hole = Hole(size=segment.get_size(), 
+                         name=f"H_{segment.get_starting_address()}", 
+                         starting_address=segment.get_starting_address())
             self.memory.add_segment(substituting_hole) # Overwrites the SegmentOfProcess in the address
 
         print("== De-Allocation Successful ==")
