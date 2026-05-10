@@ -11,17 +11,19 @@ class Segment(ABC):
             self.__class__._counter += 1
             self.name = f"{self.get_prefix()}{self.__class__._counter}"
 
-    @abstractmethod
-    def get_prefix(self):
-        pass
-
     def print_info(self):
         if self.name == None:
             self.name = "hole naming error"
         else:
             print(self.name, ": ")
+            
         print(" Starting Address: ", self.starting_address)
         print(" Size: ", self.size)
+
+    # Getters and Setters
+    @abstractmethod
+    def get_prefix(self):
+        pass
 
     def get_starting_address(self):
         return self.starting_address
