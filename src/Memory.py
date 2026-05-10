@@ -67,16 +67,19 @@ class Memory:
         self._merge_contiguous_holes()
 
     def _merge_contiguous_holes(self):
-        pointer_1 = 0
-        for pointer_2 in range(1, len(self._holes)-1):
-            hole_1 = self._holes[pointer_1]
-            hole_2 = self._holes[pointer_2]
-
-            is_contiguous = hole_1.get_ending_address() >= hole_2.get_starting_address()
-            if is_contiguous:
-                self._merge_two_holes(hole_1, hole_2)
+        if len(self._holes) <= 1:
+            return
+        
+        i = 0
+        while i < len(self._holes) - 1:
+            current = self._holes[i]
+            next_hole = self._holes[i + 1]
             
-            pointer_1 += 1
+            if current.get_ending_address() >= next_hole.get_starting_address():
+                self._merge_two_holes(current, next_hole)
+                # Don't increment i - check new merge
+            else:
+                i += 1
             
     def _merge_two_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = min(hole_1.get_starting_address(), hole_2.get_starting_address())
