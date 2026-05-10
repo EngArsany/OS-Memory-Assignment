@@ -40,22 +40,13 @@ class Memory:
         self._starting_addresses.sort()
         self._merge_contiguous_holes()
 
-    def _initialize_invalid_blocks(self) -> None:
-        """Create invalid blocks for gaps between valid memory segments."""
-        invalid_blocks = []
-        
-        for index, (start_address, segment) in enumerate(self._memory_block.items()):
-            if self._is_last_segment(index):
-                continue
-                
-            next_address = self._starting_addresses[index + 1]
-            gap = self._calculate_gap_between_segments(segment, next_address)
-            
+    def _initialize_invalid_blocks(self):
+        for i in range(len(self._starting_addresses) - 1):
+            current = self._memory_block[self._starting_addresses[i]]
+            next_addr = self._starting_addresses[i + 1]
+            gap = self._calculate_gap_between_segments(current, next_addr)
             if gap.size > 0:
-                invalid_blocks.append(gap)
-        
-        self._add_segments(invalid_blocks)
-        self._merge_contiguous_holes()
+                self.add_segment(gap)
 
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
