@@ -1,270 +1,344 @@
-# gui.py
 import tkinter as tk
 from tkinter import ttk, messagebox
+from Hole import Hole
 from Memory import Memory
-from Process import Process
 from FirstFitAllocator import FirstFitAllocator
 from BestFitAllocator import BestFitAllocator
+from Process import Process
+from SegmentOfProcess import SegmentOfProcess
+from InvalidBlock import InvalidBlock
+
+
+COLORS = {
+    "hole":    "#4a90d9",
+    "invalid": "#888888",
+    "process": ["#e74c3c", "#2ecc71", "#f39c12", "#9b59b6",
+                "#1abc9c", "#e67e22", "#3498db", "#e91e63"],
+}
+
 
 class MemoryGUI:
-    # Color mapping for different segment types
-    COLORS = {
-        'SegmentOfProcess': 'lightblue',  # Allocated segments
-        'Hole': 'lightgreen',              # Free holes
-        'InvalidBlock': 'lightgray'        # Invalid blocks
-    }
-    
     def __init__(self, memory: Memory, allocator):
         self.memory = memory
         self.allocator = allocator
-        
-        # Main window
+        self._process_color_map = {}
+        self._color_index = 0
+
         self.root = tk.Tk()
-        self.root.title("Memory Allocation Simulator")
-        self.root.geometry("900x700")
-        
-        # Setup UI sections
-        self.setup_memory_display()
-        self.setup_control_panel()
-        self.setup_legend()
-        
-        # Initial display
-        self.refresh_display()
-    
-    def setup_memory_display(self):
-        """Canvas for color-coded memory visualization"""
-        # Main frame for memory display
-        display_frame = tk.Frame(self.root)
-        display_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-        
-        # Title
-        tk.Label(display_frame, text="Memory Layout", font=('Arial', 14, 'bold')).pack()
-        
-        # Canvas with scrollbar
-        canvas_frame = tk.Frame(display_frame)
-        canvas_frame.pack(fill=tk.BOTH, expand=True)
-        
-        self.canvas = tk.Canvas(canvas_frame, bg='white', height=500)
-        scrollbar = tk.Scrollbar(canvas_frame, orient=tk.VERTICAL, command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=scrollbar.set)
-        
-        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    
-    def setup_control_panel(self):
-        """Simple control panel with basic operations"""
-        panel = tk.Frame(self.root, relief=tk.RAISED, bd=2)
-        panel.pack(fill=tk.X, padx=20, pady=10)
-        
-        # Algorithm selection
-        algo_frame = tk.LabelFrame(panel, text="Allocation Algorithm", padx=10, pady=5)
-        algo_frame.pack(side=tk.LEFT, padx=10, pady=5)
-        
-        self.algo_var = tk.StringVar(value="first-fit")
-        tk.Radiobutton(algo_frame, text="First-Fit", variable=self.algo_var, 
-                      value="first-fit").pack(anchor=tk.W)
-        tk.Radiobutton(algo_frame, text="Best-Fit", variable=self.algo_var,
-                      value="best-fit").pack(anchor=tk.W)
-        
-        # Process input
-        process_frame = tk.LabelFrame(panel, text="Create Process", padx=10, pady=5)
-        process_frame.pack(side=tk.LEFT, padx=10, pady=5)
-        
-        tk.Label(process_frame, text="Name:").grid(row=0, column=0, sticky=tk.W)
-        self.name_entry = tk.Entry(process_frame, width=10)
-        self.name_entry.grid(row=0, column=1, padx=5)
-        
-        tk.Label(process_frame, text="Segments (type,size):").grid(row=1, column=0, columnspan=2, sticky=tk.W)
-        self.segments_text = tk.Text(process_frame, height=3, width=25)
-        self.segments_text.grid(row=2, column=0, columnspan=2, pady=5)
-        tk.Label(process_frame, text="Example: Code,100;Data,120;Stack,90", 
-                font=('Arial', 8)).grid(row=3, column=0, columnspan=2)
-        
-        # Buttons
-        button_frame = tk.Frame(panel)
-        button_frame.pack(side=tk.LEFT, padx=20, pady=5)
-        
-        tk.Button(button_frame, text="Allocate", command=self.allocate_process,
-                 bg='lightgreen', width=12).pack(pady=5)
-        tk.Button(button_frame, text="Deallocate", command=self.deallocate_process,
-                 bg='lightcoral', width=12).pack(pady=5)
-        tk.Button(button_frame, text="Refresh", command=self.refresh_display,
-                 bg='lightblue', width=12).pack(pady=5)
-        
-        # Process list for deallocation
-        list_frame = tk.LabelFrame(panel, text="Running Processes", padx=10, pady=5)
-        list_frame.pack(side=tk.LEFT, padx=10, pady=5)
-        
-        self.process_listbox = tk.Listbox(list_frame, height=5, width=15)
-        self.process_listbox.pack()
-    
-    def setup_legend(self):
-        """Color legend for memory blocks"""
-        legend_frame = tk.Frame(self.root, relief=tk.GROOVE, bd=1)
-        legend_frame.pack(fill=tk.X, padx=20, pady=5)
-        
-        tk.Label(legend_frame, text="Legend:", font=('Arial', 10, 'bold')).pack(side=tk.LEFT, padx=10)
-        
-        # Legend items
-        for segment_type, color in self.COLORS.items():
-            type_name = segment_type.replace('Of', ' ') if 'Of' in segment_type else segment_type
-            color_box = tk.Label(legend_frame, bg=color, width=3, height=1, relief=tk.SUNKEN)
-            color_box.pack(side=tk.LEFT, padx=(10, 2))
-            tk.Label(legend_frame, text=type_name).pack(side=tk.LEFT, padx=(0, 15))
-    
-    def draw_memory_layout(self):
-        """Draw color-coded memory blocks"""
-        self.canvas.delete("all")
-        
-        if not self.memory.get_memory_block():
-            self.canvas.create_text(200, 250, text="No memory blocks to display", 
-                                   font=('Arial', 12), fill='gray')
+        self.root.title("Memory Allocator")
+        self.root.resizable(True, True)
+
+        self._build_ui()
+
+    # ------------------------------------------------------------------ build
+
+    def _build_ui(self):
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+
+        main = ttk.Frame(self.root, padding=8)
+        main.grid(sticky="nsew")
+        main.columnconfigure(0, weight=0)
+        main.columnconfigure(1, weight=1)
+        main.rowconfigure(0, weight=1)
+
+        self._build_controls(main)
+        self._build_display(main)
+
+    def _build_controls(self, parent):
+        ctrl = ttk.Frame(parent, padding=4)
+        ctrl.grid(row=0, column=0, sticky="ns")
+
+        # ── Setup section ──────────────────────────────────────────────────
+        setup_frame = ttk.LabelFrame(ctrl, text="Memory Setup", padding=6)
+        setup_frame.pack(fill="x", pady=(0, 8))
+
+        ttk.Label(setup_frame, text="Total Size:").grid(row=0, column=0, sticky="w")
+        self.total_size_var = tk.StringVar(value=str(self.memory.total_size))
+        ttk.Entry(setup_frame, textvariable=self.total_size_var, width=8).grid(row=0, column=1, padx=4)
+
+        ttk.Label(setup_frame, text="Holes (start,size per line):").grid(row=1, column=0, columnspan=2, sticky="w")
+        self.holes_text = tk.Text(setup_frame, width=22, height=4, font=("Courier", 9))
+        self.holes_text.grid(row=2, column=0, columnspan=2)
+        self.holes_text.insert("1.0", "0,300\n400,250\n700,200")
+
+        ttk.Label(setup_frame, text="Algorithm:").grid(row=3, column=0, sticky="w", pady=(4, 0))
+        self.algo_var = tk.StringVar(value="First-Fit")
+        ttk.Combobox(
+            setup_frame, textvariable=self.algo_var,
+            values=["First-Fit", "Best-Fit"], state="readonly", width=10
+        ).grid(row=3, column=1, padx=4, pady=(4, 0))
+
+        ttk.Button(setup_frame, text="Apply Setup", command=self._apply_setup).grid(
+            row=4, column=0, columnspan=2, pady=(6, 0), sticky="ew")
+
+        # ── Allocate section ───────────────────────────────────────────────
+        alloc_frame = ttk.LabelFrame(ctrl, text="Allocate Process", padding=6)
+        alloc_frame.pack(fill="x", pady=(0, 8))
+
+        ttk.Label(alloc_frame, text="Process Name:").grid(row=0, column=0, sticky="w")
+        self.proc_name_var = tk.StringVar()
+        ttk.Entry(alloc_frame, textvariable=self.proc_name_var, width=10).grid(row=0, column=1, padx=4)
+
+        ttk.Label(alloc_frame, text="Segments (name,size per line):").grid(row=1, column=0, columnspan=2, sticky="w")
+        self.segments_text = tk.Text(alloc_frame, width=22, height=5, font=("Courier", 9))
+        self.segments_text.grid(row=2, column=0, columnspan=2)
+        self.segments_text.insert("1.0", "Code,100\nData,120\nStack,90")
+
+        ttk.Button(alloc_frame, text="Allocate", command=self._allocate).grid(
+            row=3, column=0, columnspan=2, pady=(6, 0), sticky="ew")
+
+        # ── Deallocate section ─────────────────────────────────────────────
+        dealloc_frame = ttk.LabelFrame(ctrl, text="Deallocate Process", padding=6)
+        dealloc_frame.pack(fill="x")
+
+        ttk.Label(dealloc_frame, text="Process:").grid(row=0, column=0, sticky="w")
+        self.dealloc_var = tk.StringVar()
+        self.dealloc_combo = ttk.Combobox(
+            dealloc_frame, textvariable=self.dealloc_var,
+            state="readonly", width=12)
+        self.dealloc_combo.grid(row=0, column=1, padx=4)
+
+        ttk.Button(dealloc_frame, text="Deallocate", command=self._deallocate).grid(
+            row=1, column=0, columnspan=2, pady=(6, 0), sticky="ew")
+
+    def _build_display(self, parent):
+        display = ttk.Frame(parent, padding=4)
+        display.grid(row=0, column=1, sticky="nsew")
+        display.columnconfigure(0, weight=1)
+        display.columnconfigure(1, weight=1)
+        display.rowconfigure(0, weight=1)
+
+        # Memory map canvas
+        map_frame = ttk.LabelFrame(display, text="Memory Layout", padding=4)
+        map_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 4))
+        map_frame.rowconfigure(0, weight=1)
+        map_frame.columnconfigure(0, weight=1)
+
+        self.canvas = tk.Canvas(map_frame, width=180, bg="white", highlightthickness=0)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+
+        map_scroll = ttk.Scrollbar(map_frame, orient="vertical", command=self.canvas.yview)
+        map_scroll.grid(row=0, column=1, sticky="ns")
+        self.canvas.configure(yscrollcommand=map_scroll.set)
+
+        # Segment tables
+        table_frame = ttk.LabelFrame(display, text="Segment Tables", padding=4)
+        table_frame.grid(row=0, column=1, sticky="nsew")
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
+
+        self.table_text = tk.Text(
+            table_frame, width=36, font=("Courier", 9),
+            state="disabled", wrap="none")
+        self.table_text.grid(row=0, column=0, sticky="nsew")
+
+        tbl_scroll_y = ttk.Scrollbar(table_frame, orient="vertical", command=self.table_text.yview)
+        tbl_scroll_y.grid(row=0, column=1, sticky="ns")
+        self.table_text.configure(yscrollcommand=tbl_scroll_y.set)
+
+        self._refresh_display()
+
+    # ---------------------------------------------------------------- actions
+
+    def _apply_setup(self):
+        try:
+            total = int(self.total_size_var.get())
+        except ValueError:
+            messagebox.showerror("Error", "Total size must be an integer.")
             return
-        
-        # Calculate dimensions
-        bar_width = 350
-        start_x = 50
-        start_y = 50
-        pixels_per_kb = 400 / self.memory.total_size
-        
-        y_position = start_y
-        for address, segment in self.memory.get_memory_block().items():
-            # Get segment type for color
-            segment_type = segment.__class__.__name__
-            color = self.COLORS.get(segment_type, 'white')
-            height = max(segment.get_size() * pixels_per_kb, 15)  # Minimum 15px height
-            
-            # Draw rectangle
-            rect = self.canvas.create_rectangle(
-                start_x, y_position,
-                start_x + bar_width, y_position + height,
-                fill=color, outline='black', width=1
-            )
-            
-            # Add segment info text
-            info_text = f"{segment.get_name()}\n{segment.get_size()}KB"
-            if segment_type == 'SegmentOfProcess':
-                info_text = f"{segment.process.get_name()}:{segment.data_type}\n{segment.get_size()}KB"
-            
-            self.canvas.create_text(
-                start_x + bar_width + 10, y_position + height/2,
-                text=info_text, anchor=tk.W, font=('Arial', 9)
-            )
-            
-            # Add address label
-            addr_text = f"@{segment.get_starting_address()}"
-            self.canvas.create_text(
-                start_x - 10, y_position + height/2,
-                text=addr_text, anchor=tk.E, font=('Arial', 8), fill='gray'
-            )
-            
-            y_position += height
-            
-            # Add thin separator line
-            if y_position < start_y + 400:
-                self.canvas.create_line(
-                    start_x - 20, y_position,
-                    start_x + bar_width, y_position,
-                    fill='lightgray', dash=(2, 2)
-                )
-        
-        # Add total memory indicator
-        self.canvas.create_rectangle(
-            start_x, start_y - 25,
-            start_x + bar_width, start_y - 15,
-            fill='black'
-        )
-        self.canvas.create_text(
-            start_x + bar_width/2, start_y - 20,
-            text=f"Total Memory: {self.memory.total_size} KB",
-            font=('Arial', 10, 'bold')
-        )
-        
-        # Set scroll region
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-    
-    def update_process_list(self):
-        """Update the list of running processes"""
-        self.process_listbox.delete(0, tk.END)
-        for process in self.memory.get_process_list():
-            self.process_listbox.insert(tk.END, process.get_name())
-    
-    def allocate_process(self):
-        """Create and allocate a new process"""
-        name = self.name_entry.get().strip()
+
+        holes = []
+        for line in self.holes_text.get("1.0", "end").strip().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(",")
+            if len(parts) != 2:
+                messagebox.showerror("Error", f"Invalid hole line: '{line}'. Use start,size")
+                return
+            try:
+                start, size = int(parts[0]), int(parts[1])
+            except ValueError:
+                messagebox.showerror("Error", f"Non-integer in hole line: '{line}'")
+                return
+            holes.append(Hole(size=size, starting_address=start))
+
+        self.memory.__init__(total, holes)
+
+        algo = self.algo_var.get()
+        if algo == "First-Fit":
+            self.allocator.__class__ = FirstFitAllocator
+            self.allocator.__init__("First-Fit Allocator", self.memory)
+        else:
+            self.allocator.__class__ = BestFitAllocator
+            self.allocator.__init__("Best-Fit Allocator", self.memory)
+
+        self._process_color_map.clear()
+        self._color_index = 0
+        self._refresh_display()
+
+    def _allocate(self):
+        name = self.proc_name_var.get().strip()
         if not name:
-            messagebox.showerror("Error", "Please enter a process name")
+            messagebox.showerror("Error", "Enter a process name.")
             return
-        
-        # Parse segments
-        segments_text = self.segments_text.get("1.0", tk.END).strip()
-        if not segments_text:
-            messagebox.showerror("Error", "Please enter at least one segment")
+
+        segments_raw = self.segments_text.get("1.0", "end").strip().splitlines()
+        if not segments_raw:
+            messagebox.showerror("Error", "Enter at least one segment.")
             return
-        
-        segments = []
-        for seg_str in segments_text.split(';'):
-            if ',' in seg_str:
-                try:
-                    seg_type, size = seg_str.split(',')
-                    segments.append((seg_type.strip(), int(size.strip())))
-                except ValueError:
-                    messagebox.showerror("Error", f"Invalid segment format: {seg_str}\nUse: Type,Size")
-                    return
-            else:
-                messagebox.showerror("Error", f"Invalid segment format: {seg_str}\nUse: Type,Size")
+
+        parsed_segments = []
+        for line in segments_raw:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(",")
+            if len(parts) != 2:
+                messagebox.showerror("Error", f"Invalid segment line: '{line}'. Use name,size")
                 return
-        
-        # Update allocator based on selected algorithm
-        if self.algo_var.get() == "first-fit":
-            from FirstFitAllocator import FirstFitAllocator
-            self.allocator = FirstFitAllocator("First-Fit", self.memory)
-        else:
-            from BestFitAllocator import BestFitAllocator
-            self.allocator = BestFitAllocator("Best-Fit", self.memory)
-        
-        # Create and allocate process
-        process = Process(name, len(segments))
-        for seg_type, size in segments:
-            process.add_segment(seg_type, size)
-        
+            try:
+                seg_size = int(parts[1])
+            except ValueError:
+                messagebox.showerror("Error", f"Non-integer size in: '{line}'")
+                return
+            parsed_segments.append((parts[0].strip(), seg_size))
+
+        process = Process(name, len(parsed_segments))
+        for seg_name, seg_size in parsed_segments:
+            process.add_segment(seg_name, seg_size)
+
         self.allocator.allocate(process)
-        
-        # Refresh display
-        self.refresh_display()
-        
-        # Show result
+
         if process in self.memory.get_process_list():
-            messagebox.showinfo("Success", f"Process '{name}' allocated successfully!\nAlgorithm: {self.algo_var.get()}")
+            self._assign_color(name)
         else:
-            messagebox.showwarning("Failed", f"Process '{name}' could not be allocated - Not enough contiguous memory")
-        
-        # Clear input
-        self.name_entry.delete(0, tk.END)
-        self.segments_text.delete("1.0", tk.END)
-    
-    def deallocate_process(self):
-        """Deallocate selected process"""
-        selection = self.process_listbox.curselection()
-        if not selection:
-            messagebox.showerror("Error", "Please select a process to deallocate")
+            messagebox.showwarning("Does Not Fit", f"Process {name} does not fit in memory.")
+
+        self._refresh_display()
+
+    def _deallocate(self):
+        name = self.dealloc_var.get().strip()
+        if not name:
+            messagebox.showerror("Error", "Select a process to deallocate.")
             return
-        
-        process_name = self.process_listbox.get(selection[0])
-        
-        # Find and deallocate process
-        for process in self.memory.get_process_list():
-            if process.get_name() == process_name:
-                self.allocator.deallocate(process)
-                self.refresh_display()
-                messagebox.showinfo("Success", f"Process '{process_name}' deallocated")
-                return
-    
-    def refresh_display(self):
-        """Update all visual elements"""
-        self.draw_memory_layout()
-        self.update_process_list()
-    
+
+        target = next(
+            (p for p in self.memory.get_process_list() if p.get_name() == name),
+            None
+        )
+        if target is None:
+            messagebox.showerror("Error", f"Process '{name}' not found in memory.")
+            return
+
+        self.allocator.deallocate(target)
+        self._refresh_display()
+
+    # --------------------------------------------------------------- display
+
+    def _refresh_display(self):
+        self._draw_memory()
+        self._draw_segment_tables()
+        self._update_process_list()
+
+    def _draw_memory(self):
+        self.canvas.delete("all")
+
+        total = self.memory.total_size
+        canvas_width = 180
+        canvas_height = max(600, total)
+        scale = canvas_height / total
+
+        BAR_X0, BAR_X1 = 40, canvas_width - 10
+
+        self.canvas.configure(scrollregion=(0, 0, canvas_width, canvas_height + 20))
+
+        for seg in self.memory.get_memory_block().values():
+            y0 = int(seg.get_starting_address() * scale)
+            y1 = int(seg.get_ending_address() * scale)
+            color = self._segment_color(seg)
+
+            self.canvas.create_rectangle(BAR_X0, y0, BAR_X1, y1,
+                                         fill=color, outline="white", width=1)
+
+            label = self._segment_label(seg)
+            mid_y = (y0 + y1) / 2
+            block_height = y1 - y0
+            if block_height >= 12:
+                self.canvas.create_text(
+                    (BAR_X0 + BAR_X1) / 2, mid_y,
+                    text=label, fill="white", font=("Arial", 7, "bold"),
+                    width=BAR_X1 - BAR_X0 - 4)
+
+            # address labels
+            self.canvas.create_text(BAR_X0 - 2, y0, text=str(seg.get_starting_address()),
+                                     anchor="e", font=("Arial", 7), fill="#333")
+
+        # ending address
+        self.canvas.create_text(BAR_X0 - 2, canvas_height,
+                                 text=str(total), anchor="e", font=("Arial", 7), fill="#333")
+
+    def _draw_segment_tables(self):
+        self.table_text.configure(state="normal")
+        self.table_text.delete("1.0", "end")
+
+        processes = self.memory.get_process_list()
+        if not processes:
+            self.table_text.insert("end", "(no processes allocated)")
+        else:
+            for proc in processes:
+                self.table_text.insert("end", f"Process: {proc.get_name()}\n")
+                self.table_text.insert("end", f"{'Segment':<12}{'Start':>8}{'Size':>8}\n")
+                self.table_text.insert("end", "-" * 28 + "\n")
+                for seg in proc.get_segments():
+                    self.table_text.insert(
+                        "end",
+                        f"{seg.get_data_type():<12}{seg.get_starting_address():>8}{seg.get_size():>8}\n"
+                    )
+                self.table_text.insert("end", "\n")
+
+        self.table_text.configure(state="disabled")
+
+    def _update_process_list(self):
+        names = [p.get_name() for p in self.memory.get_process_list()]
+        self.dealloc_combo["values"] = names
+        if names:
+            self.dealloc_var.set(names[0])
+        else:
+            self.dealloc_var.set("")
+
+    # ---------------------------------------------------------------- helpers
+
+    def _assign_color(self, process_name: str):
+        if process_name not in self._process_color_map:
+            self._process_color_map[process_name] = (
+                COLORS["process"][self._color_index % len(COLORS["process"])]
+            )
+            self._color_index += 1
+
+    def _segment_color(self, seg) -> str:
+        if isinstance(seg, Hole):
+            return COLORS["hole"]
+        if isinstance(seg, InvalidBlock):
+            return COLORS["invalid"]
+        if isinstance(seg, SegmentOfProcess):
+            name = seg.get_process().get_name()
+            if name not in self._process_color_map:
+                self._assign_color(name)
+            return self._process_color_map[name]
+        return "#cccccc"
+
+    def _segment_label(self, seg) -> str:
+        if isinstance(seg, Hole):
+            return f"{seg.get_name()}\n{seg.get_size()}"
+        if isinstance(seg, InvalidBlock):
+            return f"invalid\n{seg.get_size()}"
+        if isinstance(seg, SegmentOfProcess):
+            return f"{seg.get_process().get_name()}.{seg.get_data_type()}\n{seg.get_size()}"
+        return seg.get_name()
+
+    # ------------------------------------------------------------------- run
+
     def run(self):
-        """Start the GUI"""
         self.root.mainloop()

@@ -54,6 +54,20 @@ class Memory:
                     self._starting_addresses.sort()
             i += 1
 
+        # Check gap between the last segment and end of memory
+        if self._starting_addresses:
+            last = self._memory_block[self._starting_addresses[-1]]
+            trailing_gap_size = self.total_size - last.get_ending_address()
+            if trailing_gap_size > 0:
+                gap = InvalidBlock(
+                    size=trailing_gap_size,
+                    name=f"I_{last.get_starting_address()}",
+                    starting_address=last.get_ending_address()
+                )
+                self.add_segment(gap)
+                self._starting_addresses.append(gap.starting_address)
+                self._starting_addresses.sort()
+
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
         for segment in segments:
