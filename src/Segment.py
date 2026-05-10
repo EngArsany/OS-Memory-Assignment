@@ -20,6 +20,10 @@ class Segment(ABC):
         print(" Starting Address: ", self.starting_address)
         print(" Size: ", self.size)
 
+    @property
+    def ending_address(self):
+        return self.starting_address + self.size
+
     # Getters and Setters
     @abstractmethod
     def get_prefix(self):
