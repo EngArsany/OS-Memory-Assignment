@@ -110,6 +110,12 @@ class Memory:
         self._memory_block = dict(sorted(self._memory_block.items()))
       
     # Representation
+    def set_memory_block(self, memory_block : dict):
+        self.memory_block = memory_block
+
+    def set_holes(self, holes : List):
+        self._holes = holes
+
     def draw_memory(self) -> None:
         """Draw memory visualization (implementation pending)."""
         pass
@@ -130,5 +136,3 @@ class Memory:
     def get_process_list(self):
         return self.processes
     
-    def set_memory_block(self, memory_block : dict):
-        self.memory_block = memory_block
