@@ -32,13 +32,15 @@ class Allocator(ABC):
     # Core Logic
     def allocate(self, process : Process):
         hole_list = self.memory.get_holes()
-        spare_memory_block = copy.deepcopy(self.memory.get_memory_block())
+        backup_memory = copy.deepcopy(self.memory.get_memory_block())
+        backup_holes = copy.deepcopy(self.memory.get_holes())
 
         segments = process.get_segments()
         for segment in segments:
             chosen_hole = self.choose_hole(segment, hole_list)
             if chosen_hole is None:
-                self.memory.set_memory_block(spare_memory_block)
+                self.memory.set_memory_block(backup_memory)
+                self.memory.set_holes(backup_holes)
                 print(f"== Process {process.get_name()} does not fit! ==")
                 return
                 
