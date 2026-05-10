@@ -11,7 +11,8 @@ class SegmentOfProcess(Segment):
     # Override
     def print_info(self):
         print(self.process.get_name())
-        print(self.name, ": ", self.size)
+        print(self.data_type, ": ", self.size)
+        super().print_info()
 
     def get_prefix(self):
         return "S"
