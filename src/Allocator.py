@@ -21,10 +21,20 @@ class Allocator(ABC):
         segment_size = segment.get_size()
 
         segment.set_starting_address(hole_starting_address)
-        # Add the segment to the memory block  
 
+        # Remove the hole from memory block at its old address
+        if hole_starting_address in self.memory.get_memory_block():
+            del self.memory.get_memory_block()[hole_starting_address]
+
+        # Update Hole position and size
         hole.set_starting_address(hole_starting_address + segment_size)
         hole.shrink_by(segment_size)
+
+        # Add the updated hole back to memory block if it still has size
+        if hole.get_size() > 0:
+            self.memory.get_memory_block()[hole.get_starting_address()] = hole
+        else:
+            self.memory.get_holes().remove(hole)
 
     def _is_hole(self, segment : Segment) -> bool:
         return isinstance(segment, Hole)
