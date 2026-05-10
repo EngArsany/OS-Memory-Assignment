@@ -31,22 +31,28 @@ class Memory:
 
     # Helper Methods
     def _initialize_holes(self, holes: List[Hole]) -> None:
-        """Initialize holes and their starting addresses."""
         self._holes = sorted(holes, key=attrgetter('starting_address'))
         for hole in self._holes:
             self.add_segment(hole)
-            self._starting_addresses.append(hole.starting_address)
+            if hole.starting_address not in self._starting_addresses:
+                self._starting_addresses.append(hole.starting_address)
         
         self._starting_addresses.sort()
         self._merge_contiguous_holes()
 
     def _initialize_invalid_blocks(self):
-        for i in range(len(self._starting_addresses) - 1):
+        i = 0
+        while i < len(self._starting_addresses) - 1:
             current = self._memory_block[self._starting_addresses[i]]
             next_addr = self._starting_addresses[i + 1]
+            
             gap = self._calculate_gap_between_segments(current, next_addr)
             if gap.size > 0:
                 self.add_segment(gap)
+                if gap.starting_address not in self._starting_addresses:
+                    self._starting_addresses.append(gap.starting_address)
+                    self._starting_addresses.sort()
+            i += 1
 
     def _add_segments(self, segments: List[Segment]) -> None:
         """Add multiple segments to memory."""
@@ -61,16 +67,29 @@ class Memory:
         if len(self._holes) <= 1:
             return
         
+        # Sort holes by address
+        self._holes.sort(key=lambda h: h.get_starting_address())
+        
+        merged = []
         i = 0
-        while i < len(self._holes) - 1:
+        while i < len(self._holes):
             current = self._holes[i]
-            next_hole = self._holes[i + 1]
             
-            if current.get_ending_address() >= next_hole.get_starting_address():
-                self._merge_two_holes(current, next_hole)
-                # Don't increment i - check new merge
-            else:
-                i += 1
+            # Try to merge with next holes
+            j = i + 1
+            while j < len(self._holes) and current.get_ending_address() >= self._holes[j].get_starting_address():
+                new_size = self._holes[j].get_ending_address() - current.get_starting_address()
+                current.set_size(new_size)
+
+                del self._memory_block[self._holes[j].get_starting_address()]
+                j += 1
+            
+            merged.append(current)
+            if current.get_starting_address() in self._memory_block:
+                self._memory_block[current.get_starting_address()] = current
+            i = j
+        
+        self._holes = merged
             
     def _merge_two_holes(self, hole_1 : Hole, hole_2 : Hole):
         new_starting_address = min(hole_1.get_starting_address(), hole_2.get_starting_address())
@@ -111,7 +130,7 @@ class Memory:
       
     # Representation
     def set_memory_block(self, memory_block : dict):
-        self.memory_block = memory_block
+        self._memory_block = memory_block
 
     def set_holes(self, holes : List):
         self._holes = holes

@@ -4,7 +4,6 @@ class Segment(ABC):
     def __init__(self, size = 0, name = None, starting_address = 0):
         self.size = size
         self.starting_address = starting_address
-        self.ending_address = self.starting_address + self.size
         self.name = name
 
         if self.name is None:
@@ -38,4 +37,4 @@ class Segment(ABC):
         return self.size
     
     def get_ending_address(self):
-        return self.ending_address
+        return self.starting_address + self.size
