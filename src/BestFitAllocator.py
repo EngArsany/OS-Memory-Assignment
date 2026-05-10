@@ -5,8 +5,6 @@ from Hole import Hole
 from Memory import Memory
 
 class BestFitAllocator(Allocator):
-    max_num = 50000
-
     def __init__(self, name, memory : Memory):
         super().__init__(name, memory)
 
