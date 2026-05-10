@@ -14,10 +14,11 @@ class Allocator(ABC):
     def allocate(self, process : Process):
         hole_list = self.memory.get_holes()
         spare_memory_block = copy.deepcopy(self.memory.get_memory_block())
-        
+
         segments = process.get_segments()
         for segment in segments:
             chosen_hole = self.choose_hole(segment, hole_list)
+            # print(segment.print_info())
             if chosen_hole is None:
                 self.memory.set_memory_block(spare_memory_block)
                 print(f"== Process {process.get_name()} does not fit! ==")
@@ -26,7 +27,7 @@ class Allocator(ABC):
             self.allocate_segment_to_hole(segment, chosen_hole)
             self.memory.add_segment(segment)
         
-        self.memory.add_process_to_list[process]
+        self.memory.add_process_to_list(process)
 
     @abstractmethod
     def choose_hole(self, segment : Segment, hole_list : List) -> Hole:

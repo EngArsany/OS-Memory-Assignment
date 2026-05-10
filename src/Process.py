@@ -14,7 +14,7 @@ class Process:
         self.total_size += segment.get_size()
     
     def get_name(self):
-        return self.get_name()
+        return self.name
 
     def get_num_of_segments(self):
         return self.num_of_segments

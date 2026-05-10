@@ -24,7 +24,7 @@ def main():
     holes = [Hole(300, "H1", 0), Hole(250, "H2", 400), Hole(200, "H3", 700)]
     memory = Memory(total_memory, holes)
     print("Hello world")
-    memory.print_memory()
+    # memory.print_memory()
 
     algorithm = "first-fit"
     allocator = FirstFitAllocator("First-Fit Allocator", memory) if algorithm == "first-fit" else BestFitAllocator("Best-Fit Allocator")
@@ -35,6 +35,9 @@ def main():
     process_1.add_segment("Code", 100)
     process_1.add_segment("Data", 120)
     process_1.add_segment("Stack", 90)
+    # for segment in process_1.get_segments():
+    #     segment.print_info()
+
     allocator.allocate(process_1)
     memory.print_memory()
 

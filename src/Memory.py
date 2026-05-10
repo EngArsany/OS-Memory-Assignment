@@ -22,7 +22,6 @@ class Memory:
     def _initialize_holes(self, holes: List[Hole]) -> None:
         """Initialize holes and their starting addresses."""
         self._holes = sorted(holes, key=attrgetter('starting_address'))
-        
         for hole in self._holes:
             self.add_segment(hole)
             self._starting_addresses.append(hole.starting_address)

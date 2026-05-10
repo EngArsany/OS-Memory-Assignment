@@ -12,7 +12,7 @@ class FirstFitAllocator(Allocator):
         """Allocate the first hole that is big enough"""
 
         for hole in hole_list:
-            suitable_size = segment.get_size() == hole.get_size()
+            suitable_size = (segment.get_size() <= hole.get_size())
             if suitable_size:
                 return hole
 
